@@ -1,0 +1,37 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: cleanup-tags-registry
+  name: cleanup-tags-registry
+  namespace: ops
+spec:
+  schedule: "0 7 * * 4"
+  jobTemplate:
+    metadata:
+      labels:
+        app: cleanup-tags-registry
+    spec:
+      template:
+        metadata:
+          labels:
+            app: cleanup-tags-registry
+        spec:
+          imagePullSecrets:
+          - name: regcred
+          containers:
+          - name: cleanup-tags-registry
+            imagePullPolicy: Always
+            image: lhanxetus/deckschrubber
+            args: ['-latest', '3', '-registry', 'http://kube-registry.kube-system:5000', '-username', '$(REGISTRY_USER)', '-password', '$(REGISTRY_PASSWORD)']
+            envFrom:
+            - secretRef:
+                name: cleanup-tags-registry-secrets
+            resources:
+              limits:
+                cpu: 100m
+                memory: 100Mi
+              requests:
+                cpu: 50m
+                memory: 50Mi
+          restartPolicy: OnFailure

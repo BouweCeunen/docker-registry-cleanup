@@ -1,0 +1,33 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: garbage-collect-registry
+  name: garbage-collect-registry
+  namespace: ops
+spec:
+  schedule: "0 8 * * 4"
+  jobTemplate:
+    metadata:
+      labels:
+        app: garbage-collect-registry
+    spec:
+      template:
+        metadata:
+          labels:
+            app: garbage-collect-registry
+        spec:
+          serviceAccountName: garbage-collect-registry
+          containers:
+          - name: garbage-collect-registry
+            image: roffe/kubectl
+            command: ['bash', '-c']
+            args: ['kubectl exec $(kubectl get pods -n kube-system -o jsonpath="{.items[0].metadata.name}" -l app=kube-registry) -n kube-system -- registry garbage-collect /etc/docker/registry/config.yml']
+            resources:
+              limits:
+                cpu: 100m
+                memory: 100Mi
+              requests:
+                cpu: 50m
+                memory: 50Mi
+          restartPolicy: OnFailure
