@@ -1,4 +1,4 @@
-# docker-registry-cleanup
+# Docker Registry Cleanup
 Cleanup your docker registry and only keep the 3 (can be configured) latest images.
 
 ## Installation
